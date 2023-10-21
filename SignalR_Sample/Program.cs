@@ -46,6 +46,7 @@ namespace SignalR_Sample
             app.MapHub<UserHub>("/hubs/userCount");
             app.MapHub<DeathlyHallowsHub>("/hubs/deathyhallows");
             app.MapHub<HouseGroupHub>("/hubs/houseGroup");
+            app.MapHub<NotificationHub>("/hubs/notification");
 
             app.UseAuthorization();
 

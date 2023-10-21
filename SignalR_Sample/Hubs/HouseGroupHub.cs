@@ -10,7 +10,7 @@ namespace SignalR_Sample.Hubs
         public async Task JoinHouse(string houseName)
         {
             if (!GroupJoined.Contains(Context.ConnectionId + ":" + houseName))
-            {
+             {
                 GroupJoined.Add(Context.ConnectionId + ":" + houseName);
                 string houseList = "";
                 foreach (var str in GroupJoined)
@@ -21,14 +21,14 @@ namespace SignalR_Sample.Hubs
                     }    
                 }
 
-                await Clients.Caller.SendAsync("subscriptionStatus", houseList, houseName, true);
-
+                await Clients.Caller.SendAsync("subscriptionStatus", houseList, houseName.ToLower(), true);
+                await Clients.Others.SendAsync("newMemberAddedToHouse", houseName);
                 await Groups.AddToGroupAsync(Context.ConnectionId, houseName);    
             }
         }
         public async Task LeaveHouse(string houseName)
         {
-            if (!GroupJoined.Contains(Context.ConnectionId + ":" + houseName))
+            if (GroupJoined.Contains(Context.ConnectionId + ":" + houseName))
             {
                 GroupJoined.Remove(Context.ConnectionId + ":" + houseName);
                 string houseList = "";
@@ -40,9 +40,14 @@ namespace SignalR_Sample.Hubs
                     }
                 }
 
-                await Clients.Caller.SendAsync("subscriptionStatus", houseList, houseName, false);
+                await Clients.Caller.SendAsync("subscriptionStatus", houseList, houseName.ToLower(), false);
+                await Clients.Others.SendAsync("newMemberRemovedFromHouse", houseName);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, houseName);
             }
+        } 
+        public async Task TriggerHouseNotify(string houseName)
+        {
+           await Clients.Group(houseName).SendAsync("triggerHouseNotification");
         }
     }
 }

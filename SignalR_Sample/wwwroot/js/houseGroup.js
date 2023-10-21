@@ -15,50 +15,82 @@ let trigger_slytherin = document.getElementById("trigger_slytherin");
 let trigger_hufflepuff = document.getElementById("trigger_hufflepuff");
 let trigger_ravenclaw = document.getElementById("trigger_ravenclaw");
 
-var connectionhouseCount = new signalR.HubConnectionBuilder()
-    // .configureLogging(signalR.LogLevel.Information) 
-    .withUrl("/hubs/houseGroup", signalR.HttpTransportType.WebSockets).build();
 
-//subscribe
+//create connection
+var connectionHouse = new signalR.HubConnectionBuilder()
+    //.configureLogging(signalR.LogLevel.Information)
+    .withUrl("/hubs/houseGroup").build();
+
 btn_gryffindor.addEventListener("click", function (event) {
-    connectionhouseCount.send("JoinHouse", "Gryffindor");
-    event.preventDefault();
-});
-btn_slytherin.addEventListener("click", function (event) {
-    connectionhouseCount.send("JoinHouse", "Slytherin");
+    connectionHouse.send("JoinHouse", "Gryffindor");
     event.preventDefault();
 });
 btn_hufflepuff.addEventListener("click", function (event) {
-    connectionhouseCount.send("JoinHouse", "Hufflepuff");
+    connectionHouse.send("JoinHouse", "Hufflepuff");
     event.preventDefault();
 });
 btn_ravenclaw.addEventListener("click", function (event) {
-    connectionhouseCount.send("JoinHouse", "Ravenclaw");
+    connectionHouse.send("JoinHouse", "Ravenclaw");
+    event.preventDefault();
+});
+btn_slytherin.addEventListener("click", function (event) {
+    connectionHouse.send("JoinHouse", "Slytherin");
     event.preventDefault();
 });
 
-
-// unsubscribe
 btn_un_gryffindor.addEventListener("click", function (event) {
-    connectionhouseCount.send("LeaveHouse", "Gryffindor");
-    event.preventDefault();
-});
-btn_un_slytherin.addEventListener("click", function (event) {
-    connectionhouseCount.send("LeaveHouse", "Slytherin");
+    connectionHouse.send("LeaveHouse", "Gryffindor");
     event.preventDefault();
 });
 btn_un_hufflepuff.addEventListener("click", function (event) {
-    connectionhouseCount.send("LeaveHouse", "Hufflepuff");
+    connectionHouse.send("LeaveHouse", "Hufflepuff");
     event.preventDefault();
 });
 btn_un_ravenclaw.addEventListener("click", function (event) {
-    connectionhouseCount.send("LeaveHouse", "Ravenclaw");
+    connectionHouse.send("LeaveHouse", "Ravenclaw");
+    event.preventDefault();
+});
+btn_un_slytherin.addEventListener("click", function (event) {
+    connectionHouse.send("LeaveHouse", "Slytherin");
     event.preventDefault();
 });
 
-connectionhouseCount.on("subscriptionStatus", (strGroupJoined, houseName, hasSubscribe) => {
-    lbl_houseJoined.innerText = strGroupJoined;
-    if (hasSubscribe) {
+trigger_gryffindor.addEventListener("click", function (event) {
+    connectionHouse.send("TriggerHouseNotify", "Gryffindor");
+    event.preventDefault();
+});
+trigger_hufflepuff.addEventListener("click", function (event) {
+    connectionHouse.send("TriggerHouseNotify", "Hufflepuff");
+    event.preventDefault();
+});
+trigger_ravenclaw.addEventListener("click", function (event) {
+    connectionHouse.send("TriggerHouseNotify", "Ravenclaw");
+    event.preventDefault();
+});
+trigger_slytherin.addEventListener("click", function (event) {
+    connectionHouse.send("TriggerHouseNotify", "Slytherin");
+    event.preventDefault();
+});
+
+
+connectionHouse.on("triggerHouseNotification", (houseName) => {
+    toastr.success(`A new notification for ${houseName} has been launched.`);
+});
+
+connectionHouse.on("newMemberAddedToHouse", (houseName) => {
+    toastr.success(`Member has subscribed to ${houseName}`);
+});
+
+connectionHouse.on("newMemberRemovedFromHouse", (houseName) => {
+    toastr.warning(`Member has unsubscribed from ${houseName}`);
+});
+
+connectionHouse.on("subscriptionStatus", (strGroupsJoined, houseName, hasSubscribed) => {
+    lbl_houseJoined.innerText = strGroupsJoined;
+
+    if (hasSubscribed) {
+        //subscribe to
+
         switch (houseName) {
             case 'slytherin':
                 btn_slytherin.style.display = "none";
@@ -79,9 +111,11 @@ connectionhouseCount.on("subscriptionStatus", (strGroupJoined, houseName, hasSub
             default:
                 break;
         }
-        toastr.success(`You have subcribe successfully. ${houseName}`);
-    } else {
-        // unsubscribe
+
+        toastr.success(`You have Subscribed Successfully. ${houseName}`);
+    }
+    else {
+        //unsubscribe
         switch (houseName) {
             case 'slytherin':
                 btn_slytherin.style.display = "";
@@ -102,16 +136,20 @@ connectionhouseCount.on("subscriptionStatus", (strGroupJoined, houseName, hasSub
             default:
                 break;
         }
-        toastr.success(`You have unsubcribe successfully. ${houseName}`);
+        toastr.warning(`You have Unsubscribed from ${houseName}`);
     }
-});
 
-function fullFilled() {
-    console.log("Connection to User hub successfully!!!");
+})
+
+
+
+//start connection
+function fulfilled() {
+    //do something on start
+    console.log("Connection to User Hub Successful");
 }
-// Fail 
 function rejected() {
-
+    //rejected logs
 }
-// start connection
-connectionhouseCount .start().then(fullFilled, rejected);
+
+connectionHouse.start().then(fulfilled, rejected);
