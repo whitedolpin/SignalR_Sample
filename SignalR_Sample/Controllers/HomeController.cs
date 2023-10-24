@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using SignalR_Sample.Data;
 using SignalR_Sample.Hubs;
 using SignalR_Sample.Models;
+using SignalR_Sample.Models.ViewModel;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace SignalR_Sample.Controllers
 {
@@ -10,18 +14,32 @@ namespace SignalR_Sample.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IHubContext<DeathlyHallowsHub> _deathlyHub;
-        public HomeController(ILogger<HomeController> logger, IHubContext<DeathlyHallowsHub> deathlyHub)
+        private readonly ApplicationDbContext _context;
+        public HomeController(ILogger<HomeController> logger, IHubContext<DeathlyHallowsHub> deathlyHub, ApplicationDbContext context)
         {
             _logger = logger;
             _deathlyHub = deathlyHub;   
+            _context = context; 
         }
 
         public IActionResult Index()
         {
             return View();
         }
+        [Authorize]
+		public IActionResult Chat()
+		{
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ChatVM chatVM = new()
+            {
+                Rooms = _context.ChatRooms.ToList(),
+                MaxRoomAllowed = 4,
+                UserId = userId,
+            };
+			return View(chatVM);
+		}
 
-        public async Task<IActionResult> DeathlyHallows(string type)
+		public async Task<IActionResult> DeathlyHallows(string type)
         {
             if (SD.DealthyHallowRace.ContainsKey(type))
             {

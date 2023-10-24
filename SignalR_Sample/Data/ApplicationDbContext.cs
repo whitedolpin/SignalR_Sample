@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SignalR_Sample.Models;
 
 namespace SignalR_Sample.Data
 {
@@ -9,5 +10,7 @@ namespace SignalR_Sample.Data
             : base(options)
         {
         }
+
+        public DbSet<ChatRoom> ChatRooms { get; set; }
     }
 }

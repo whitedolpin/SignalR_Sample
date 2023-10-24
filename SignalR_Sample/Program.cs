@@ -47,8 +47,8 @@ namespace SignalR_Sample
             app.MapHub<DeathlyHallowsHub>("/hubs/deathyhallows");
             app.MapHub<HouseGroupHub>("/hubs/houseGroup");
             app.MapHub<NotificationHub>("/hubs/notification");
-
-            app.UseAuthorization();
+			app.MapHub<ChatHub>("/hubs/chat");
+			app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
